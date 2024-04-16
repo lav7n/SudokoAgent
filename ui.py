@@ -14,53 +14,79 @@ GRAY = (60, 60, 60)
 L_GRAY = (220, 220, 220)
 YELLOW = (255, 255, 0)
 
-# Set the width and height of each grid location
+# This sets the WIDTH and HEIGHT of each grid location
 WIDTH = HEIGHT = 50
 
-# Set the margin between each cell
+# This sets the margin between each cell
 MARGIN = 5
+numbers_1to9 = [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4, pygame.K_5, pygame.K_6, pygame.K_7, pygame.K_8,
+                pygame.K_9]
 
-# Set the width and height of the screen
+# Set the width and height of the screen [width, height]
 size = (500, 500)
-
-# Initialize pygame
+# screen = pygame.display.set_mode(size)
 pygame.init()
-
-# Set the font for text
 font = pygame.font.Font('freesansbold.ttf', 32)
 
-# Flag to control the main loop
+# pygame.display.set_caption("Sudoku King")
+
+# Loop until the user clicks the close button.
 done = False
 
-# Function to cheat and fill in the whole board with solution
-def cheatingAllTheWay(sol):
+
+def cheatingAllTheWay(sol): 
     for row in range(len(Board)):
         for column in range(len(Board[row])):
-            if Board[row][column] == 0:
-                Board[row][column] = sol[row][column]
-                addNumToBoard(Board[row][column], row, column, L_GREEN)
-                time.sleep(0.05)
-                pygame.display.flip()
+          if Board[row][column] == 0: #Update unsolved locations
+            Board[row][column] = sol[row][column] #Use the solution to update board
+            addNumToBoard(Board[row][column], row, column, L_GREEN)
+            time.sleep(0.05)
+            pygame.display.flip()
     finish(sol)
 
-# Function to add a number to the board
+
 def addNumToBoard(number, row, column, color):
     addNewRect(row, column, WHITE, 5)
     addNewRect(row, column, color, None)
-    text = font.render(str(number), True, BLACK)
-    textRect = text.get_rect()
+    font = pygame.font.Font('freesansbold.ttf', 32)
+    text = font.render(str(number), True, BLACK, )
+    textRect = text.get_rect()  # get_rect() -> Returns a new rectangle covering the entire surface.
     textRect.center = ((MARGIN + WIDTH) * column + MARGIN + WIDTH / 2, (MARGIN + HEIGHT) * row + MARGIN + WIDTH / 2)
     screen.blit(text, textRect)
     drawTheBorder()
 
-# Function to check if the board is solved correctly
-def finish(sol):
-    if sol == Board:
-        print("Good")
-    else:
-        print("Not good")
 
-# Function to draw the border of the grid
+def finish(sol):
+     
+    if sol == Board: #Check if the state of the board is same as the solution.
+        print("good")
+    else:
+        print("not good")
+
+
+def addNewRect(row, col, color, width):
+    rectSize = pygame.Rect((MARGIN + WIDTH) * col + MARGIN, (MARGIN + HEIGHT) * row + MARGIN, WIDTH,
+                           HEIGHT)
+    if width is not None:
+        pygame.draw.rect(screen, color, rectSize, width)  # coloring only the border
+    else:
+        pygame.draw.rect(screen, color, rectSize)  # coloring the whole rectangle
+
+
+def flickering(timeFlickering, color):  # flickering with color on-off
+    addNewRect(row, column, color, 5)
+    pygame.display.flip()
+    time.sleep(timeFlickering)
+    addNewRect(row, column, WHITE, 5)
+    pygame.display.flip()
+    time.sleep(timeFlickering)
+    addNewRect(row, column, color, 5)
+    pygame.display.flip()
+    time.sleep(timeFlickering)
+    addNewRect(row, column, WHITE, 5)
+    pygame.display.flip()
+
+
 def drawTheBorder():
     dif = 500 // 9
     for i in range(10):
@@ -73,44 +99,57 @@ def drawTheBorder():
             pygame.draw.line(screen, BLACK, (0, i * dif), (500, i * dif), thick)
             pygame.draw.line(screen, BLACK, (i * dif, 0), (i * dif, 500), thick)
 
-# Function to draw the initial board
+
 def drawInitBoard():
+    # printBoard(solvedBoard)
     for row in range(len(Board)):
         for column in range(len(Board[row])):
             color = L_GRAY
-            if Board[row][column] == 0:
+            if Board[row][column] == 0:  # if we want to change to background of the empty cells
                 color = WHITE
-            pygame.draw.rect(screen, color, [(MARGIN + WIDTH) * column + MARGIN, (MARGIN + HEIGHT) * row + MARGIN, WIDTH, HEIGHT])
-            text = font.render(str(Board[row][column]) if Board[row][column] != 0 else "", True, BLACK)
-            textRect = text.get_rect()
-            textRect.center = ((MARGIN + WIDTH) * column + MARGIN + WIDTH / 2, (MARGIN + HEIGHT) * row + MARGIN + WIDTH / 2)
+                # ----- drawing the rect ------
+            pygame.draw.rect(screen, color,
+                             [(MARGIN + WIDTH) * column + MARGIN, (MARGIN + HEIGHT) * row + MARGIN, WIDTH, HEIGHT])
+            # show nothing if the number is 0
+            font = pygame.font.Font('freesansbold.ttf', 32)
+            if Board[row][column] == 0:
+                text = font.render(" ", True, BLACK, )  # render(text, anti-alias[True], color, background=None)
+            else:
+                text = font.render(str(Board[row][column]), True, BLACK, )
+
+            textRect = text.get_rect()  # get_rect() -> Returns a new rectangle covering the entire surface.
+            textRect.center = (
+                (MARGIN + WIDTH) * column + MARGIN + WIDTH / 2, (MARGIN + HEIGHT) * row + MARGIN + WIDTH / 2)
             screen.blit(text, textRect)
             drawTheBorder()
 
-# Main program loop
+
+# -------- Main Program Loop -----------
 if __name__ == "__main__":
     flag1 = True
+
     while flag1:
         level = chooseLevel()
-        if level in [1, 2, 3]:
+        if level == 1 or level == 2 or level == 3:
             print(level)
             flag1 = False
-    pygame.display.set_caption("Sudoku King")
+    pygame.display.set_caption("Sudoku King1")
     screen = pygame.display.set_mode(size)
 
-    sol = mainSolver(level)
+    sol = mainSolver(level)  # first at all the script solve the sudoku by itself
 
-    print("Solved Board:")
+    print("solveBoard")
     printBoard(sol)
 
+    # ------ draw the board ------
     pygame.init()
     screen.fill(BLACK)
     drawInitBoard()
     readyForInput = False
     key = None
-
-    # Main event loop
     while not done:
+        # --- Main event loop
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
@@ -119,9 +158,10 @@ if __name__ == "__main__":
                     key = chr(event.key)
                 if event.key == pygame.K_RETURN:
                     finish(sol)
-                if event.key == pygame.K_c:
+                if event.key == pygame.K_c: #Press 'c' to auto solve the whole board. 
                     cheatingAllTheWay(sol)
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # ------ if clicked on a cell get his row and column ------
                 if readyForInput is True:
                     addNewRect(row, column, WHITE, None)
                     drawTheBorder()
@@ -130,25 +170,32 @@ if __name__ == "__main__":
                 pos = pygame.mouse.get_pos()
                 column = pos[0] // (WIDTH + MARGIN)
                 row = pos[1] // (WIDTH + MARGIN)
+                # ------ checking if it is a empty (0 inside) ------
                 if Board[row][column] == 0:
+                    # ------ coloring the border of the clicked cell ----- #TODO YELLOW
+                   
                     addNewRect(row, column, YELLOW, 5)
                     readyForInput = True
+                    # ------ now only wait for input from the user -----
 
         if readyForInput and key is not None:
+            # ------ checking if the key is good at it's place ------
             if int(key) == sol[row][column]:
                 Board[row][column] = key
-                flickering(0.1, GREEN)
+                flickering(0.1, GREEN)  # flickering at a 0.2 seconds with the color green
                 addNumToBoard(key, row, column, L_GREEN)
             else:
-                flickering(0.1, RED)
+                flickering(0.1, RED)  # flickering at a 0.2 seconds with the color red
                 addNumToBoard(key, row, column, L_RED)
 
+            # -----------------------------------------------
             drawTheBorder()
             readyForInput = False
 
         key = None
         pygame.display.flip()
         pygame.display.update()
+
 
 # Close the window and quit.
 pygame.quit()
