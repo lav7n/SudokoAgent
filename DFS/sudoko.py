@@ -1,9 +1,6 @@
 
 import copy
 from generator import *
-
-# -------- Global board ----------------
-
 Board = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -29,10 +26,8 @@ def solve(board):
         if validCheck(board, number, (row, col)):
             board[row][col] = number
             # TODO: need to show it on the GUI
-
             if solve(board):
                 return True
-
             board[row][col] = 0
             # TODO: delete the number in the GUI
     return False
